@@ -1,6 +1,6 @@
-pkgbase = linux-cachyos
+pkgbase = linux-cachyos-ozel
 	pkgdesc = Linux EEVDF + LTO + AutoFDO + Propeller Cachy Sauce Kernel by CachyOS with other patches and improvements.
-	pkgver = 7.1.6
+	pkgver = 7.3.6
 	pkgrel = 1
 	url = https://github.com/CachyOS/linux-cachyos
 	arch = x86_64
@@ -27,21 +27,32 @@ pkgbase = linux-cachyos
 	makedepends = clang
 	makedepends = llvm
 	makedepends = lld
+	makedepends = pahole>=1:1.32-2
 	options = !strip
 	options = !debug
 	options = !lto
-	source = https://github.com/CachyOS/linux/releases/download/cachyos-7.1.6-1/cachyos-7.1.6-1.tar.gz
-	source = https://github.com/CachyOS/linux/releases/download/cachyos-7.1.6-1/cachyos-7.1.6-1.tar.gz.asc
+	source = https://github.com/CachyOS/linux/releases/download/cachyos-7.3.6-1/cachyos-7.3.6-1.tar.gz
+	source = https://github.com/CachyOS/linux/releases/download/cachyos-7.3.6-1/cachyos-7.3.6-1.tar.gz.asc
 	source = config
-	source = https://raw.githubusercontent.com/cachyos/kernel-patches/master/7.1/misc/dkms-clang.patch
+	source = nvme-kingston-kc3000-disable-fua.patch
+	source = https://raw.githubusercontent.com/cachyos/kernel-patches/master/7.3/misc/dkms-clang.patch
+	source = https://download.nvidia.com/XFree86/NVIDIA-kernel-module-source/NVIDIA-kernel-module-source-620.73.04.tar.xz
+	source = https://raw.githubusercontent.com/cachyos/kernel-patches/master/7.3/misc/nvidia/0001-fix-dsc-correct-RC-parameter-tables-to-match-VESA-DS.patch
+	source = https://raw.githubusercontent.com/cachyos/kernel-patches/master/7.3/misc/nvidia/0002-fix-dp-add-Bigscreen-Beyond-VR-headset-to-WAR-databa.patch
+	source = https://raw.githubusercontent.com/cachyos/kernel-patches/master/7.3/misc/nvidia/0004-Open-sysfs-config-from-the-userspace-root-on-7.3.patch
 	validpgpkeys = E18447AC260021D31F3FF6C4C8A2A4774B8B63C4
 	validpgpkeys = E8B9AA39F054E30E8290D492C3C4820857F654FE
-	b2sums = d1a694cb55a5bf013987022b7d87d8430142f26686d52eaa33928685ec9116dd238dd6fa33eb91364e68bc33ca120ce82db35c1dc247d68f5556111aeff11537
+	b2sums = 67e2a98ad5df5469afae493c34a3f2155932abb94b16c016a8782790bf3a305f91c03b126555294bd4f88d74952bb997f4839b5769980dafbcad08d0579ac7ea
 	b2sums = SKIP
-	b2sums = a81b1a49b7fd277a8a1395e38696c435489808399527dc49436c9b36940d5c652c523622efe68d34dd191669d8838ab4c041000331279ccf77cdc11dc4baaca2
+	b2sums = e6fc382da6b317f14b0ffe1e22e120ea8c9efa03a95ee58360765629b7b81f89e98f04349134232215ae0ff8aa10c2200a7551a3c3aeb1e5d1fb1e4c5673f0e9
+	b2sums = e405d409b65959995515a810da3332a0191784567b894fd2218ded66ff82150dc659537f1e6197bcc2bce7e5b3e4c8cf2b25c3f13d9e4d76b47491d4490d2610
 	b2sums = c992567bd7dd8553432be496ffa1c17e2f5ebe9c7edb51945cf977e1b742dd6517c210d8843bb82744ca705efd07f8027cd7dde41b50215ebd707a34aa81462e
+	b2sums = 390d1761b0ac3db00db8c8de4fa249aded45f67dcd7ff55d995910862fc968761bedae1f9f0191471c4cbc6bbae76b371c99847c4bbf8789a50fce8e56f49d5a
+	b2sums = 43386fb36a975bd5215d477bd2e11d91adbdc20393b9898788ee5734834aaeb6af83e8e493a0d20f6bd7fd6ecbff124f7877ede44c3beafb007b9c7effa44fe6
+	b2sums = 8106fe252012ca17f32c56877a98e047befe15c71adc0e6c97927760e08bfe7f78a8b71721470564514328c470f26345ec81796bd9dedd47a6c330d57205fae8
+	b2sums = 4731aa2e4bff627c27f61e9ef31a01bf33611b85085a35859b3ed5c903e9e3457ce78b1a7f471f7253b3c4f51ce8914dc299b36c552067ebbc77db091c90c502
 
-pkgname = linux-cachyos
+pkgname = linux-cachyos-ozel
 	pkgdesc = The Linux EEVDF + LTO + AutoFDO + Propeller Cachy Sauce Kernel by CachyOS with other patches and improvements. kernel and modules
 	depends = coreutils
 	depends = kmod
@@ -57,10 +68,10 @@ pkgname = linux-cachyos
 	provides = NTSYNC-MODULE
 	provides = VHBA-MODULE
 	provides = ADIOS-MODULE
-	provides = linux-cachyos-lto=7.1.6-1
+	provides = linux-cachyos-lto=7.3.6-1
 	replaces = linux-cachyos-lto
 
-pkgname = linux-cachyos-headers
+pkgname = linux-cachyos-ozel-headers
 	pkgdesc = Headers and scripts for building modules for the Linux EEVDF + LTO + AutoFDO + Propeller Cachy Sauce Kernel by CachyOS with other patches and improvements. kernel
 	depends = binutils
 	depends = glibc
@@ -71,10 +82,21 @@ pkgname = linux-cachyos-headers
 	depends = xxhash
 	depends = zlib
 	depends = zstd
-	depends = linux-cachyos
+	depends = linux-cachyos-ozel
 	depends = clang
 	depends = llvm
 	depends = lld
+	depends = pahole>=1:1.32-2
 	provides = LINUX-HEADERS
-	provides = linux-cachyos-lto-headers=7.1.6-1
+	provides = linux-cachyos-lto-headers=7.3.6-1
 	replaces = linux-cachyos-lto-headers
+
+pkgname = linux-cachyos-ozel-nvidia-open
+	pkgdesc = nvidia open modules of 620.73.04 driver for the linux-cachyos-ozel kernel
+	license = MIT AND GPL-2.0-only
+	depends = linux-cachyos-ozel=7.3.6-1
+	depends = nvidia-utils=620.73.04
+	depends = libglvnd
+	provides = NVIDIA-MODULE
+	conflicts = linux-cachyos-ozel-nvidia
+	conflicts = linux-cachyos-ozel-nvidia-580xx
