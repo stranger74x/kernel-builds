@@ -1,0 +1,12 @@
+# In the variant folders, track ONLY these files. Everything else there (downloaded
+# sources, src/, pkg/, built packages) stays invisible to git.
+# To track a new file there later, add a "!" line for it below.
+/cachyos/*/*
+!/cachyos/*/PKGBUILD
+!/cachyos/*/.SRCINFO
+!/cachyos/*/config
+!/cachyos/*/nvme-kingston-kc3000-disable-fua.patch
+
+# Reports from `make check`
+/fua-check/
+/fua-check-remote/
