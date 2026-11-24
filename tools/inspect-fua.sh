@@ -17,8 +17,8 @@ patch=$variant/nvme-kingston-kc3000-disable-fua.patch
 Q=NVME_QUIRK_NO_FUA
 
 src=""
-for d in "$variant"/src/linux-*; do
-  [ -f "$d/drivers/nvme/host/core.c" ] && { src=$d; break; }
+for d in "$variant"/src/*/; do
+  [ -f "${d}drivers/nvme/host/core.c" ] && { src=${d%/}; break; }
 done
 [ -n "$src" ]   || { echo "setup: no kernel source in $variant/src (run: makepkg -od)"; exit 2; }
 [ -f "$patch" ] || { echo "setup: patch file not found: $patch"; exit 2; }
