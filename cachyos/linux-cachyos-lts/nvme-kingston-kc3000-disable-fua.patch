@@ -1,0 +1,45 @@
+diff --git a/drivers/nvme/host/core.c b/drivers/nvme/host/core.c
+index a73cc6a..2994008 100644
+--- a/drivers/nvme/host/core.c
++++ b/drivers/nvme/host/core.c
+@@ -2461,6 +2461,9 @@ static int nvme_update_ns_info_block(struct nvme_ns *ns,
+ 	else
+ 		lim.features &= ~(BLK_FEAT_WRITE_CACHE | BLK_FEAT_FUA);
+ 
++	if (ns->ctrl->quirks & NVME_QUIRK_NO_FUA)
++		lim.features &= ~BLK_FEAT_FUA;
++
+ 	if (info->is_rotational)
+ 		lim.features |= BLK_FEAT_ROTATIONAL;
+ 
+diff --git a/drivers/nvme/host/nvme.h b/drivers/nvme/host/nvme.h
+index cfdcf53..2b470b7 100644
+--- a/drivers/nvme/host/nvme.h
++++ b/drivers/nvme/host/nvme.h
+@@ -56,6 +56,12 @@ extern struct mutex nvme_subsystems_lock;
+  * the standard.
+  */
+ enum nvme_quirks {
++	/*
++	 * Do not use FUA writes, use a full cache flush instead.
++	 * Out-of-tree; bit 30 is kept far from upstream's bits on purpose.
++	 */
++	NVME_QUIRK_NO_FUA			= (1 << 30),
++
+ 	/*
+ 	 * Prefers I/O aligned to a stripe size specified in a vendor
+ 	 * specific Identify field.
+diff --git a/drivers/nvme/host/pci.c b/drivers/nvme/host/pci.c
+index 664a36e..2e77eea 100644
+--- a/drivers/nvme/host/pci.c
++++ b/drivers/nvme/host/pci.c
+@@ -4208,7 +4208,8 @@ static const struct pci_device_id nvme_id_table[] = {
+ 	{ PCI_DEVICE(0x2646, 0x2263),   /* KINGSTON A2000 NVMe SSD  */
+ 		.driver_data = NVME_QUIRK_NO_DEEPEST_PS, },
+ 	{ PCI_DEVICE(0x2646, 0x5013),   /* Kingston KC3000, Kingston FURY Renegade */
+-		.driver_data = NVME_QUIRK_NO_SECONDARY_TEMP_THRESH, },
++		.driver_data = NVME_QUIRK_NO_SECONDARY_TEMP_THRESH |
++				NVME_QUIRK_NO_FUA, },
+ 	{ PCI_DEVICE(0x2646, 0x5018),   /* KINGSTON OM8SFP4xxxxP OS21012 NVMe SSD */
+ 		.driver_data = NVME_QUIRK_DISABLE_WRITE_ZEROES, },
+ 	{ PCI_DEVICE(0x2646, 0x5016),   /* KINGSTON OM3PGP4xxxxP OS21011 NVMe SSD */

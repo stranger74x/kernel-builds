@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Usage: check-fua-patch 7.2.9 6.18.55
+# Quick early warning (seconds): downloads the 3 nvme files of each version, tests the patch.
+# Not the real check (that is `make check`): CachyOS's own patches are not included here.
+patch=$(realpath "${PATCH:-$(dirname "$0")/../cachyos/linux-cachyos/nvme-kingston-kc3000-disable-fua.patch}")
+for v in "$@"; do
+  d=$(mktemp -d); mkdir -p "$d/drivers/nvme/host"
+  for f in core.c nvme.h pci.c; do
+    curl -sfL "https://raw.githubusercontent.com/gregkh/linux/v$v/drivers/nvme/host/$f" \
+      -o "$d/drivers/nvme/host/$f" || { echo "$v: download failed"; continue 2; }
+  done
+  if ! (cd "$d" && git init -q && git apply -p1 "$patch") 2>/dev/null; then
+    echo "$v: PATCH FAILS"; rm -rf "$d"; continue
+  fi
+  n=$(grep -c '(1 << 30)' "$d/drivers/nvme/host/nvme.h")
+  if [ "$n" = 1 ]; then echo "$v: OK (patch applies, bit 30 is unique)"
+  else echo "$v: WARNING bit 30 used $n times"; fi
+  rm -rf "$d"
+done

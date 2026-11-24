@@ -1,0 +1,64 @@
+name: Check KC3000 patch
+
+# A cheap "throwaway VM": downloads the kernel source, lets makepkg apply the
+# distro's patches plus ours (makepkg --nobuild = no build), then inspects the result.
+# Takes minutes, not 4 hours, and never builds a package.
+# Runs when the `test` branch is pushed. Merging test into main is the approval.
+on:
+  workflow_dispatch:
+  push:
+    branches: [test]
+    paths:
+      - 'cachyos/**/PKGBUILD'
+      - 'cachyos/**/nvme-kingston-kc3000-disable-fua.patch'
+      - 'tools/inspect-fua.sh'
+      - '.github/workflows/check-patch.yml'
+
+jobs:
+  check:
+    name: ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    container: archlinux:base-devel
+    strategy:
+      fail-fast: false          # one variant failing must not hide the other
+      matrix:
+        include:
+          - { name: linux-cachyos,     dir: cachyos/linux-cachyos }
+          - { name: linux-cachyos-lts, dir: cachyos/linux-cachyos-lts }
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Both copies of the patch must be identical
+      run: cmp cachyos/linux-cachyos/nvme-kingston-kc3000-disable-fua.patch cachyos/linux-cachyos-lts/nvme-kingston-kc3000-disable-fua.patch
+    - name: Setup environment
+      run: |
+          # same repo setup as the build workflows, so makedepends resolve the same way
+          cat << 'EOF2' >> /etc/pacman.conf
+          [cachyos]
+          Server = https://mirror.cachyos.org/repo/x86_64/cachyos
+          EOF2
+          pacman-key --init
+          pacman-key --recv-keys F3B607488DB35A47 --keyserver keyserver.ubuntu.com
+          pacman-key --lsign-key F3B607488DB35A47
+          pacman -Syu --noconfirm --needed git
+
+          useradd builder -m
+          echo "builder ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chmod -R a+rw .
+    - name: Download source and apply patches (no build)
+      run: |
+          cd "${{ matrix.dir }}"
+          sudo -H -E -u builder makepkg --nobuild --syncdeps --skippgpcheck --noconfirm
+    - name: Inspect the result
+      run: bash tools/inspect-fua.sh "${{ matrix.dir }}"
+    - name: Show report on the run page
+      if: always()
+      run: |
+          f="fua-check/${{ matrix.name }}/report.md"
+          [ -f "$f" ] && cat "$f" >> "$GITHUB_STEP_SUMMARY"
+    - name: Upload the 3 patched files + report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: fua-check-${{ matrix.name }}
+        path: fua-check/${{ matrix.name }}/
